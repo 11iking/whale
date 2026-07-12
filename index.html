@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a2a43">
+<title>鲸鱼还账器</title>
+<style>
+:root{--ocean-1:#0a2a43;--ocean-2:#0e3d5c;--ocean-3:#15678f;--ocean-4:#1f8fb5;--foam:#d6f1ff;--green:#6bcf7f;--gold:#ffd166;--danger:#ff4d5e;--card:rgba(255,255,255,.96)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:linear-gradient(180deg,var(--ocean-1) 0%,var(--ocean-2) 35%,var(--ocean-3) 100%);min-height:100vh;color:#1a3a4f;overflow-x:hidden;position:relative}
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubble{position:absolute;bottom:-120px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.55),rgba(214,241,255,.12));animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-110vh) translateX(20px);opacity:0}}
+.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:16px 14px 90px}
+header{text-align:center;color:var(--foam);padding:8px 0 4px}
+.whale{font-size:56px;display:inline-block;animation:swim 4s ease-in-out infinite}
+@keyframes swim{0%,100%{transform:translateX(0) rotate(-2deg)}50%{transform:translateX(14px) rotate(2deg)}}
+header h1{font-size:24px;margin-top:2px;letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+header p{font-size:12px;opacity:.78;margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.stat{background:var(--card);border-radius:14px;padding:10px 4px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.stat .lab{font-size:10px;color:#6b8aa0;margin-bottom:2px}
+.stat .val{font-size:17px;font-weight:800}
+.stat.t .val{color:var(--ocean-3)}.stat.o .val{color:var(--danger)}.stat.w .val{color:#e0a32e}.stat.r .val{color:var(--green)}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 26px rgba(0,0,0,.16)}
+.card h2{font-size:16px;color:var(--ocean-2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+label{font-size:12px;color:#5d7a90;font-weight:600;display:block;margin-bottom:3px}
+input,select{width:100%;padding:10px 12px;border:2px solid #cfe6f2;border-radius:10px;font-size:15px;background:#f6fbff;color:#1a3a4f;transition:.15s;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:var(--ocean-4);box-shadow:0 0 0 3px rgba(31,143,181,.15)}
+.optrow{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:8px 12px;border:2px solid #cfe6f2;border-radius:10px;font-size:13px;font-weight:700;background:#f6fbff;color:#3a5a72;cursor:pointer;transition:.12s;user-select:none}
+.chip.on{background:linear-gradient(135deg,var(--ocean-4),var(--ocean-3));color:#fff;border-color:var(--ocean-3)}
+.btn{border:none;border-radius:11px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;transition:.12s;font-family:inherit}
+.btn-pri{background:linear-gradient(135deg,var(--ocean-4),var(--ocean-3));color:#fff;width:100%;box-shadow:0 5px 14px rgba(21,103,143,.4)}
+.btn-pri:active{transform:scale(.98)}
+.btn-sm{padding:8px 12px;font-size:12px;border-radius:9px}
+.btn-pay{background:var(--green);color:#fff}
+.btn-conf{background:var(--gold);color:#5a3d00}
+.btn-del{background:#fff;color:var(--danger);border:1.5px solid #ffd0d5}
+.btn-ghost{background:#eef5f9;color:#5d7a90}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.tools input{flex:1;min-width:100px}
+.seg{display:flex;background:#eaf4fa;border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{border:none;background:transparent;padding:7px 8px;font-size:11px;font-weight:700;border-radius:8px;cursor:pointer;color:#6b8aa0;font-family:inherit}
+.seg button.on{background:#fff;color:var(--ocean-3);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.debt{background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 6px 20px rgba(0,0,0,.14);border-left:5px solid var(--ocean-4);position:relative;overflow:hidden}
+.debt.overdue{border-left-color:var(--danger);background:linear-gradient(180deg,#fff,#fff5f6)}
+.debt.awaiting{border-left-color:var(--gold)}
+.debt.cleared{opacity:.7;border-left-color:var(--green)}
+.debt.cleared .reason{text-decoration:line-through}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.reason{font-size:15px;font-weight:700;color:#1a3a4f;flex:1;word-break:break-word}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.b-pending{background:#e7f4fb;color:var(--ocean-3)}
+.b-overdue{background:#ffe2e5;color:var(--danger);animation:pulse 1.6s infinite}
+.b-awaiting{background:#fff3d6;color:#b8860b}
+.b-cleared{background:#e3f7e8;color:#2a9d4a}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,94,.5)}50%{box-shadow:0 0 0 6px rgba(255,77,94,0)}}
+.meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:#6b8aa0;margin:5px 0}
+.meta b{color:#3a5a72}
+.amt{display:flex;align-items:baseline;gap:8px;margin:6px 0;flex-wrap:wrap}
+.amt .now{font-size:24px;font-weight:800}
+.debt.overdue .amt .now{color:var(--danger)}
+.debt:not(.overdue):not(.cleared) .amt .now{color:var(--ocean-3)}
+.debt.cleared .amt .now{color:var(--green)}
+.amt .grow{font-size:11px;color:var(--danger);font-weight:700;background:#ffe2e5;padding:3px 8px;border-radius:8px}
+.row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.repays{margin-top:6px;border-top:1px dashed #dbe9f2;padding-top:6px}
+.ritem{font-size:11px;color:#6b8aa0;display:flex;justify-content:space-between;padding:2px 0}
+.ritem span{color:#2a9d4a;font-weight:700}
+.empty{text-align:center;color:var(--foam);opacity:.8;padding:36px 0;font-size:14px}
+.growinfo{font-size:11px;color:#6b8aa0;background:#f6fbff;border-radius:9px;padding:9px;margin-top:5px;line-height:1.6}
+.growinfo b{color:var(--danger)}
+.modal{position:fixed;inset:0;background:rgba(8,30,48,.6);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:0}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:20px 20px 0 0;padding:18px;max-width:520px;width:100%;box-shadow:0 -10px 40px rgba(0,0,0,.4);max-height:90vh;overflow:auto}
+.modal .box h3{color:var(--ocean-2);margin-bottom:12px;font-size:16px}
+.modal .row{justify-content:flex-end}
+#loginView{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+#loginView .whale{font-size:80px;margin-bottom:8px}
+#loginView h1{color:var(--foam);font-size:26px;margin-bottom:4px;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+#loginView p{color:var(--foam);opacity:.7;font-size:13px;margin-bottom:24px}
+.login-box{background:var(--card);border-radius:18px;padding:24px;width:100%;max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.login-box label{margin-top:12px}
+.login-box .btn-pri{margin-top:18px}
+.login-box .switch{text-align:center;margin-top:14px;font-size:12px;color:#6b8aa0;line-height:1.7}
+.topbar{display:flex;justify-content:space-between;align-items:center;color:var(--foam);font-size:12px;margin-bottom:10px;opacity:.85}
+.topbar .logout{background:rgba(255,255,255,.12);border:none;color:var(--foam);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(10,42,67,.95);border:1px solid var(--ocean-4);color:var(--foam);padding:10px 18px;border-radius:12px;font-size:13px;z-index:100;transition:transform .3s;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.iou{background:#fdf6e3;border:2px solid #c9a96a;border-radius:8px;padding:24px 20px;color:#3a2a12;font-family:"KaiTi","STKaiti",serif;line-height:2;position:relative}
+.iou h2{text-align:center;color:#a83232;font-size:24px;letter-spacing:8px;margin-bottom:12px;font-weight:700}
+.iou .body{font-size:14px;white-space:pre-wrap}
+.iou .body .n{color:#a83232;font-weight:700;border-bottom:1px solid #a83232;padding:0 3px}
+.iou .sig{display:flex;justify-content:space-between;margin-top:20px;font-size:13px}
+.iou .seal{position:absolute;right:24px;bottom:40px;width:56px;height:56px;border:3px solid #a83232;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#a83232;font-size:11px;font-weight:700;transform:rotate(-12deg);opacity:.85;text-align:center;line-height:1.2}
+.iou .note{font-size:11px;color:#8a6a3a;margin-top:10px;border-top:1px dashed #c9a96a;padding-top:6px}
+footer{text-align:center;color:var(--foam);opacity:.5;font-size:11px;margin-top:16px}
+@media(max-width:380px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media print{.noprint{display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="bubbles" id="bubbles"></div>
+
+<div id="loginView">
+  <div class="whale">🐳</div>
+  <h1>鲸鱼还账器</h1>
+  <p>登录后区分债主 / 欠账人</p>
+  <div class="login-box">
+    <div style="font-size:17px;font-weight:700;color:var(--ocean-2);text-align:center">登录 / 注册</div>
+    <label>邮箱</label>
+    <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+    <label>至少6位</label>
+    <input type="password" id="password" placeholder="至少6位" autocomplete="current-password">
+    <button class="btn btn-pri" onclick="doAuth()">登录 / 注册</button>
+    <div class="switch">首次使用？输入邮箱密码会自动注册账号。两个用户各用自己的邮箱登录。</div>
+  </div>
+</div>
+
+<div id="appView" style="display:none">
+  <div class="wrap">
+    <div class="topbar">
+      <span id="userInfo">👤 </span>
+      <button class="logout" onclick="doLogout()">退出登录</button>
+    </div>
+    <header>
+      <div class="whale">🐳</div>
+      <h1>鲸鱼还账器</h1>
+      <p>登录后区分债主 / 欠账人</p>
+    </header>
+    <div class="stats">
+      <div class="stat t"><div class="lab">📊 总数</div><div class="val" id="sCount">0</div></div>
+      <div class="stat o"><div class="lab">🔥 逾期</div><div class="val" id="sOverdue">0下</div></div>
+      <div class="stat w"><div class="lab">⏳ 待确认</div><div class="val" id="sAwait">0</div></div>
+      <div class="stat r"><div class="lab">✅ 已清</div><div class="val" id="sPaid">0</div></div>
+    </div>
+    <div class="card">
+      <h2>📝 记一笔账</h2>
+      <div class="grid">
+        <div><label>债主</label><select id="fCreditor"></select></div>
+        <div><label>欠账人</label><select id="fDebtor"></select></div>
+        <div><label>日期</label><input type="date" id="fDate"></div>
+        <div><label>数目（下）</label><input type="number" id="fCount" min="1" step="1" placeholder="20"></div>
+        <div class="full"><label>原因</label><input type="text" id="fReason" placeholder="比如：没完成作业"></div>
+        <div class="full"><label>还账方式（部位）</label><div class="optrow" id="partRow"></div></div>
+        <div><label>截止日期 DDL</label><input type="date" id="fDdl"></div>
+        <div><label>还账工具</label><div class="optrow" id="toolRow"></div></div>
+        <div class="full"><button class="btn btn-pri" onclick="addDebt()">＋ 添加账单（自动生成欠条）</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📒 还账管理</h2>
+      <div class="tools">
+        <input type="text" id="search" placeholder="搜索原因…" oninput="render()">
+        <div class="seg" id="filter">
+          <button class="on" data-f="all" onclick="setFilter('all')">全部</button>
+          <button data-f="pending" onclick="setFilter('pending')">待还</button>
+          <button data-f="overdue" onclick="setFilter('overdue')">逾期</button>
+          <button data-f="awaiting" onclick="setFilter('awaiting')">待确认</button>
+          <button data-f="cleared" onclick="setFilter('cleared')">已清</button>
+        </div>
+      </div>
+      <div class="growinfo">逾期：实际应还 = ⌈剩余数目 × (1 + 日增长率)^逾期天数⌉，每日复利、向上取整。日增长率：<input type="number" id="rateSet" min="0" step="1" style="width:60px;display:inline-block" onchange="setRate()"> % / 天</div>
+      <div id="list" style="margin-top:12px"></div>
+    </div>
+    <footer>鲸鱼还账器 · 数据云端同步 · 今日 <span id="today"></span></footer>
+  </div>
+</div>
+
+<div class="modal" id="payModal"><div class="box"><h3 id="payTitle">还账</h3><div class="grid"><div><label>还账日期</label><input type="date" id="pDate"></div><div><label>本次还账（下）</label><input type="number" id="pCount" min="1" step="1" placeholder="本次还几下"></div><div class="full"><label>还账方式（部位）</label><div class="optrow" id="pPartRow"></div></div><div class="full"><label>还账工具</label><div class="optrow" id="pToolRow"></div></div></div><div class="row" style="margin-top:12px"><button class="btn btn-sm btn-ghost" onclick="closePay()">取消</button><button class="btn btn-sm btn-pay" onclick="confirmPay()">确认还账</button></div></div></div>
+
+<div class="modal" id="iouModal"><div class="box" style="max-width:520px"><h3>📜 欠条已生成</h3><div id="iouBody"></div><div class="row noprint" style="margin-top:12px"><button class="btn btn-sm btn-ghost" onclick="closeIou()">关闭</button><button class="btn btn-sm btn-pay" onclick="printIou()">🖨 打印 / 保存 PDF</button></div></div></div>
+
+<div class="modal" id="confModal"><div class="box"><h3>🔐 债主确认清账</h3><p style="font-size:13px;color:#6b8aa0;margin-bottom:10px">本笔账已全部还清。为视为正式清账，请由<b style="color:var(--ocean-3)" id="cfCreditor"></b>（债主）输入邮箱确认：</p><input type="text" id="cfInput" placeholder="输入债主邮箱确认"><div class="row" style="margin-top:10px"><button class="btn btn-sm btn-ghost" onclick="closeConf()">取消</button><button class="btn btn-sm btn-conf" onclick="doConfirm()">确认清账</button></div></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://tlxgcdsuuzbegwcbknxv.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRseGdjZHN1dXpiZWd3Y2Jrbnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTYzNTcsImV4cCI6MjA5OTQzMjM1N30.cVLwzjbFP2LyYQ7s-aKZHxdUUOVjsf2X-T5k76VXRXE";
+const PARTS=["屁股","大腿","侧腰","手"];
+const TOOLS=["尺子","藤条","拍子"];
+const T_STRS={"other":"其他","customPh":"请输入自定义项：","tEnterEmail":"请输入邮箱和密码","tPw6":"密码至少6位","tRegOk":"注册成功！请用同一邮箱密码再次登录","tLoginFail":"登录失败: ","tLoadFail":"加载失败: ","tNeedUsers":"请选择债主和欠账人","tSameUser":"债主和欠账人不能相同","tNeedReason":"请填写原因","tNeedCount":"请填写数目","tNeedDdl":"请选择 DDL","tAddFail":"添加失败: ","tDelConfirm":"删除这条账单？","tDelFail":"删除失败","tDeleted":"已删除","tNeedPayCount":"请填写还账数目","tPayOver":"本次超过当前应还，确定？","tPayFail":"还账失败: ","tPayOk":"还账成功","tConfFail":"确认失败：邮箱不符，须债主本人确认","tConfFail2":"确认失败","tRevokeConfirm":"撤销清账确认？","tRevokeFail":"撤销失败","tClearedOk":"已正式清账！","tAddOk":"已记入账本！","emptyText":"暂无账单，快记一笔吧～","awaitNote":"已还清，等债主确认","labRaw":"原始","labRepaid":"已还","labRemain":"剩余","labOverdueDay":"逾期","dayUnit":"天","labGrow":"增长","downUnit":"下","tomorrowGrow":"明天涨到","iouTitle":"欠条已生成","confTitle":"债主确认清账","payTitle":"还账","confBtn":"债主确认清账","revokeBtn":"撤销","confPrefix":"本笔账已全部还清。为视为正式清账，请由","confSuffix":"（债主）输入邮箱确认：","iouH2":"欠条","iouNow":"今由","iouTo":"向","iouBorrow":"借账：","iouAmount":"欠账数目：","iuoUnit":"下","iouReason":"原因：","iouPart":"还账方式（部位）：","iouTool":"还账工具：","iouDate":"记账日期：","iouDdl":"还账截止：","iouOverduePrefix":"逾期未还者，实际应还数目按每日","iouOverdueMid":"复利增长，公式：⌈剩余数目 × (1+","iouOverdueTail":"%)^逾期天数⌉，逐日累加、向上取整，越拖越多。","iouEffective":"本欠条自双方确认之日起生效。","iouCreditor":"债主（借出方）：","iouDebtor":"欠账人（借入方）：","sealL1":"鲸鱼","sealL2":"还账","iouNote":"※ 本欠条由「鲸鱼还账器」自动生成，云端存储。还清后须债主确认方视为正式清账。","fPending":"待还","fOverdue":"逾期","fAwait":"待确认","fCleared":"已清"};
+let sb=null,session=null,myEmail="",allUsers=[],debts=[],settings={dailyRate:1},filter="all",payId=null,confId=null,iouHtml="",fPart="",fTool="",pPart="",pTool="";
+const $=id=>document.getElementById(id);
+const todayStr=()=>new Date().toLocaleDateString("en-CA");
+const ceil=n=>Math.ceil(n);
+function daysBetween(a,b){return Math.floor((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000);}
+function saveSettings(){localStorage.setItem("whale_settings",JSON.stringify(settings));}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+function repaidSum(d){return (d.repayments||[]).reduce((s,r)=>s+r.count,0);}
+function remaining(d){return Math.max(0,d.count-repaidSum(d));}
+function overdueDays(d){const t=todayStr();return t>d.ddl?Math.max(0,daysBetween(d.ddl,t)):0;}
+function currentCount(d){const r=remaining(d);if(r<=0)return 0;const od=overdueDays(d);if(od<=0)return r;return ceil(r*Math.pow(1+settings.dailyRate/100,od));}
+function status(d){if(d.confirmed)return"cleared";if(remaining(d)<=0)return"awaiting";return overdueDays(d)>0?"overdue":"pending";}
+function setFilter(f){filter=f;document.querySelectorAll("#filter button").forEach(b=>b.classList.toggle("on",b.dataset.f===f));render();}
+function setRate(){settings.dailyRate=Math.max(0,parseInt($("rateSet").value)||0);saveSettings();render();}
+function initSB(){if(SUPABASE_URL.indexOf("YOUR")>=0){$("loginView").style.display="flex";document.querySelector(".login-box").insertAdjacentHTML("beforeend","<div style=\"color:var(--danger);margin-top:14px;font-size:13px;font-weight:700\">Please fill SUPABASE_URL and SUPABASE_KEY in index.html</div>");return false;}sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return true;}
+async function doAuth(){if(!sb){if(!initSB())return;}const email=$("email").value.trim(),pw=$("password").value;if(!email||!pw){toast(T_STRS.tEnterEmail);return;}if(pw.length<6){toast(T_STRS.tPw6);return;}let {data,error}=await sb.auth.signInWithPassword({email,password:pw});if(error){const {data:r2,error:e2}=await sb.auth.signUp({email,password:pw});if(e2){toast(T_STRS.tLoginFail+(e2.message||""));return;}toast(T_STRS.tRegOk);return;}onAuth(data.session);}
+async function doLogout(){if(sb)await sb.auth.signOut();session=null;location.reload();}
+async function onAuth(s){session=s;myEmail=s.user.email;$("loginView").style.display="none";$("appView").style.display="block";await sb.from("profiles").upsert({email:myEmail},{onConflict:"email"});$("userInfo").textContent="\uD83D\uDC64 "+myEmail;settings=JSON.parse(localStorage.getItem("whale_settings")||"{\"dailyRate\":1}");$("rateSet").value=settings.dailyRate;initForm();await loadData();subscribeRealtime();}
+async function loadData(){const [dr,pr]=await Promise.all([sb.from("debts").select("*,repayments(*)").order("created_at",{ascending:false}),sb.from("profiles").select("email").order("created_at",{ascending:true})]);if(dr.error){toast(T_STRS.tLoadFail+dr.error.message);}else{debts=dr.data||[];}if(pr.error){console.log("profiles load:",pr.error.message);}else{allUsers=(pr.data||[]).map(x=>x.email);}syncSelects();render();}
+function syncSelects(){const list=[myEmail].concat(allUsers.filter(e=>e!==myEmail));const opts=list.map(e=>"<option value=\""+esc(e)+"\">"+esc(e)+"</option>").join("");["fCreditor","fDebtor"].forEach(id=>{const v=$(id).value;$(id).innerHTML=opts;if(v&&list.includes(v))$(id).value=v;});if(myEmail&&$("fCreditor").value===$("fDebtor").value){const other=allUsers.find(e=>e!==myEmail);if(other)$("fDebtor").value=other;}}
+function subscribeRealtime(){if(!sb)return;sb.channel("debts").on("postgres_changes",{event:"*",schema:"public",table:"debts"},()=>loadData()).subscribe();sb.channel("repayments").on("postgres_changes",{event:"*",schema:"public",table:"repayments"},()=>loadData()).subscribe();sb.channel("profiles").on("postgres_changes",{event:"*",schema:"public",table:"profiles"},()=>loadData()).subscribe();}
+function initForm(){$("fDate").value=todayStr();const d=new Date();d.setDate(d.getDate()+7);$("fDdl").value=d.toLocaleDateString("en-CA");chipRow("partRow",PARTS,()=>fPart,v=>fPart=v);chipRow("toolRow",TOOLS,()=>fTool,v=>fTool=v);}
+function chipRow(cid,items,getter,setter){const c=$(cid);c.innerHTML="";items.forEach(it=>{const el=document.createElement("div");el.className="chip"+(getter()===it?" on":"");el.textContent=it;el.onclick=()=>{setter(it);chipRow(cid,items,getter,setter);};c.appendChild(el);});const o=document.createElement("div");o.className="chip"+(getter()&&!items.includes(getter())?" on":"");o.textContent=T_STRS.other;o.onclick=()=>{const v=prompt(T_STRS.customPh,getter()&&!items.includes(getter())?getter():"");if(v!==null&&v.trim()){setter(v.trim());chipRow(cid,items,getter,setter);}};c.appendChild(o);}
+async function addDebt(){const creditor=$("fCreditor").value,debtor=$("fDebtor").value,date=$("fDate").value,reason=$("fReason").value.trim(),count=parseInt($("fCount").value),ddl=$("fDdl").value,part=fPart||PARTS[0],tool=fTool||TOOLS[0];if(!creditor||!debtor){toast(T_STRS.tNeedUsers);return;}if(creditor===debtor){toast(T_STRS.tSameUser);return;}if(!reason){toast(T_STRS.tNeedReason);return;}if(!(count>0)){toast(T_STRS.tNeedCount);return;}if(!ddl){toast(T_STRS.tNeedDdl);return;}const {data,error}=await sb.from("debts").insert({creditor,debtor,reason,count,part,tool,date,ddl}).select().single();if(error){toast(T_STRS.tAddFail+error.message);return;}showIou(data);$("fReason").value="";$("fCount").value="";toast(T_STRS.tAddOk);}
+async function delDebt(id){if(!confirm(T_STRS.tDelConfirm))return;const {error}=await sb.from("debts").delete().eq("id",id);if(error){toast(T_STRS.tDelFail);return;}toast(T_STRS.tDeleted);}
+function openPay(id){payId=id;const d=debts.find(x=>x.id===id);if(!d)return;$("payTitle").textContent="\uD83E\uDEB5 "+d.reason;$("pDate").value=todayStr();$("pCount").value="";$("pCount").placeholder=currentCount(d)+" "+T_STRS.downUnit;pPart=d.part||"";pTool=d.tool||"";chipRow("pPartRow",PARTS,()=>pPart,v=>pPart=v);chipRow("pToolRow",TOOLS,()=>pTool,v=>pTool=v);$("payModal").classList.add("on");}
+function closePay(){$("payModal").classList.remove("on");payId=null;}
+async function confirmPay(){const d=debts.find(x=>x.id===payId);if(!d)return;const count=parseInt($("pCount").value),date=$("pDate").value;if(!(count>0)){toast(T_STRS.tNeedPayCount);return;}if(count>currentCount(d)){if(!confirm(T_STRS.tPayOver))return;}const {error}=await sb.from("repayments").insert({debt_id:d.id,count,part:pPart,tool:pTool,date:date||todayStr()});if(error){toast(T_STRS.tPayFail+error.message);return;}closePay();toast(T_STRS.tPayOk);}
+function openConf(id){confId=id;const d=debts.find(x=>x.id===id);if(!d)return;$("cfCreditor").textContent=d.creditor;$("cfInput").value="";$("cfInput").placeholder=d.creditor;$("confModal").classList.add("on");setTimeout(()=>$("cfInput").focus(),60);}
+function closeConf(){$("confModal").classList.remove("on");confId=null;}
+async function doConfirm(){const d=debts.find(x=>x.id===confId);if(!d)return;const v=$("cfInput").value.trim();if(v!==d.creditor){toast(T_STRS.tConfFail);return;}const {error}=await sb.from("debts").update({confirmed:true,confirmed_at:todayStr()}).eq("id",d.id);if(error){toast(T_STRS.tConfFail2);return;}closeConf();toast(T_STRS.tClearedOk);}
+async function revokeConf(id){if(!confirm(T_STRS.tRevokeConfirm))return;const {error}=await sb.from("debts").update({confirmed:false,confirmed_at:null}).eq("id",id);if(error)toast(T_STRS.tRevokeFail);}
+function showIou(d){iouHtml="<div class=\"iou\"><h2>"+T_STRS.iouH2+"</h2><div class=\"body\">"+T_STRS.iouNow+" <span class=\"n\">"+esc(d.debtor)+"</span> "+T_STRS.iouTo+" <span class=\"n\">"+esc(d.creditor)+"</span> "+T_STRS.iouBorrow+"\n\n"+T_STRS.iouAmount+"<span class=\"n\">"+d.count+"</span> "+T_STRS.iuoUnit+"\n"+T_STRS.iouReason+"<span class=\"n\">"+esc(d.reason)+"</span>\n"+T_STRS.iouPart+"<span class=\"n\">"+esc(d.part)+"</span>\n"+T_STRS.iouTool+"<span class=\"n\">"+esc(d.tool)+"</span>\n\n"+T_STRS.iouDate+"<span class=\"n\">"+d.date+"</span>\n"+T_STRS.iouDdl+"<span class=\"n\">"+d.ddl+"</span>\n\n"+T_STRS.iouOverduePrefix+" <span class=\"n\">"+settings.dailyRate+"%</span> "+T_STRS.iouOverdueMid+settings.dailyRate+T_STRS.iouOverdueTail+"\n\n"+T_STRS.iouEffective+"</div><div class=\"sig\"><div>"+T_STRS.iouCreditor+"<br>"+esc(d.creditor)+"</div><div>"+T_STRS.iouDebtor+"<br>"+esc(d.debtor)+"</div></div><div class=\"seal\">"+T_STRS.sealL1+"<br>"+T_STRS.sealL2+"</div><div class=\"note\">"+T_STRS.iouNote+"</div></div>";$("iouBody").innerHTML=iouHtml;$("iouModal").classList.add("on");}
+function closeIou(){$("iouModal").classList.remove("on");}
+function printIou(){const w=window.open("","_blank");w.document.write("<html><head><meta charset=\"utf-8\"><title>"+T_STRS.iouTitle+"</title><style>body{margin:40px;font-family:serif}</style></head><body>"+iouHtml+"</body></html>");w.document.close();w.focus();setTimeout(()=>w.print(),300);}
+function render(){$("today").textContent=todayStr();let ov=0,aw=0,cl=0;debts.forEach(d=>{const s=status(d);if(s==="overdue")ov+=currentCount(d);if(s==="awaiting")aw++;if(s==="cleared")cl++;});$("sCount").textContent=debts.length;$("sOverdue").textContent=ov+" "+T_STRS.downUnit;$("sAwait").textContent=aw;$("sPaid").textContent=cl;const kw=($("search")&&$("search").value.trim())||"";let list=debts.filter(d=>!kw||d.reason.includes(kw));list=list.filter(d=>filter==="all"||status(d)===filter);const box=$("list");if(!list.length){box.innerHTML="<div class=\"empty\">"+T_STRS.emptyText+"</div>";return;}box.innerHTML=list.map(d=>{const s=status(d),cur=currentCount(d),rem=remaining(d),od=overdueDays(d),grow=cur-rem;const repays=(d.repayments||[]).map(r=>"<div class=\"ritem\"><span>"+r.date+"</span>"+r.count+"</div>").join("");const growBlock=s==="overdue"?"<div class=\"growinfo\">"+T_STRS.labRaw+" "+d.count+T_STRS.iuoUnit+" | "+T_STRS.labRepaid+" "+repaidSum(d)+T_STRS.iuoUnit+" | "+T_STRS.labRemain+" "+rem+T_STRS.iuoUnit+" | "+T_STRS.labOverdueDay+" "+od+T_STRS.dayUnit+" | "+T_STRS.labGrow+" +"+grow+T_STRS.iuoUnit+"<br>"+T_STRS.tomorrowGrow+" "+ceil(rem*Math.pow(1+settings.dailyRate/100,od+1))+T_STRS.iuoUnit+"</div>":"";const badge={pending:"<span class=\"badge b-pending\">"+T_STRS.fPending+"</span>",overdue:"<span class=\"badge b-overdue\">"+T_STRS.fOverdue+od+T_STRS.dayUnit+"</span>",awaiting:"<span class=\"badge b-awaiting\">"+T_STRS.fAwait+"</span>",cleared:"<span class=\"badge b-cleared\">"+T_STRS.fCleared+"</span>"}[s];const act=(s==="pending"||s==="overdue")?"<button class=\"btn btn-sm btn-pay\" onclick=\"openPay(\x27"+d.id+"\x27)\">"+T_STRS.payTitle+"</button>":(s==="awaiting"?"<button class=\"btn btn-sm btn-conf\" onclick=\"openConf(\x27"+d.id+"\x27)\">"+T_STRS.confBtn+"</button>":"<button class=\"btn btn-sm btn-ghost\" onclick=\"revokeConf(\x27"+d.id+"\x27)\">"+T_STRS.revokeBtn+"</button>");return "<div class=\"debt "+s+"\"><div class=\"head\"><div class=\"reason\">"+esc(d.reason)+"</div>"+badge+"</div><div class=\"meta\"><span>"+esc(d.debtor)+" -> "+esc(d.creditor)+"</span><span>"+d.date+"</span><span><b>"+d.ddl+"</b></span><span>"+esc(d.part)+"</span><span>"+esc(d.tool)+"</span></div><div class=\"amt\"><span class=\"now\">"+(s==="cleared"||s==="awaiting"?0:cur)+" "+T_STRS.downUnit+"</span></div>"+growBlock+(repays?"<div class=\"repays\">"+repays+"</div>":"")+(s==="awaiting"?"<div class=\"growinfo\" style=\"color:#2a9d4a\">"+T_STRS.awaitNote+"</div>":"")+"<div class=\"row\">"+act+"<button class=\"btn btn-sm btn-del\" onclick=\"delDebt(\x27"+d.id+"\x27)\">X</button></div></div>";}).join("");}
+(function(){const b=$("bubbles");for(let i=0;i<12;i++){const el=document.createElement("div");el.className="bubble";const s=8+Math.random()*30;el.style.width=s+"px";el.style.height=s+"px";el.style.left=Math.random()*100+"%";el.style.animationDuration=(9+Math.random()*12)+"s";el.style.animationDelay=(-Math.random()*12)+"s";b.appendChild(el);}})();
+if(initSB()){sb.auth.getSession().then(({data})=>{if(data.session){onAuth(data.session);}else{$("loginView").style.display="flex";}});}
+</script>
+</body>
+</html>

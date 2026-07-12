@@ -1,0 +1,18 @@
+-- profiles ?: ??????????????
+create table if not exists public.profiles (
+  email text primary key,
+  created_at timestamptz not null default now()
+);
+
+-- ?? RLS
+alter table public.profiles enable row level security;
+
+-- ??????????? profiles????????????
+create policy "profiles read for authenticated"
+  on public.profiles for select
+  using ( auth.role() = 'authenticated' );
+
+-- ???????????
+create policy "profiles insert self"
+  on public.profiles for insert
+  with check ( auth.email() = email );
