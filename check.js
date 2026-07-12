@@ -1,0 +1,1 @@
+const fs=require('fs');const h=fs.readFileSync('index.html','utf8');const m=h.match(/<script[^>]*>([\s\S]*?)<\/script>/g);if(m){m.forEach((s,i)=>{const c=s.replace(/<script[^>]*>/,'').replace(/<\/script>/,'');console.log('Script '+i+': '+c.length+' chars');try{new Function(c);console.log('  SYNTAX OK');}catch(e){console.log('  ERROR: '+e.message);}});}

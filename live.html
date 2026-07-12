@@ -117,7 +117,7 @@ footer{text-align:center;color:var(--foam);opacity:.5;font-size:11px;margin-top:
     <label>至少6位</label>
     <input type="password" id="password" placeholder="至少6位" autocomplete="current-password">
     <button class="btn btn-pri" onclick="doAuth()">登录 / 注册</button>
-    <div class="switch">首次使用？输入邮箱密码会自动注册账号。两个用户各用自己的邮箱登录。</div>
+    <div class="switch">���次使用？输入邮箱密码会自动注册账号。两个用户各用自己的邮箱登录。</div>
   </div>
 </div>
 
@@ -176,9 +176,10 @@ footer{text-align:center;color:var(--foam);opacity:.5;font-size:11px;margin-top:
 
 <div class="modal" id="iouModal"><div class="box" style="max-width:520px"><h3>📜 欠条已生成</h3><div id="iouBody"></div><div class="row noprint" style="margin-top:12px"><button class="btn btn-sm btn-ghost" onclick="closeIou()">关闭</button><button class="btn btn-sm btn-pay" onclick="printIou()">🖨 打印 / 保存 PDF</button></div></div></div>
 
-<div class="modal" id="confModal"><div class="box"><h3>🔐 债主确认清账</h3><p style="font-size:13px;color:#6b8aa0;margin-bottom:10px">本笔账已全部还清。为视为正式清账，请由<b style="color:var(--ocean-3)" id="cfCreditor"></b>（债主）输入邮箱确认：</p><input type="text" id="cfInput" placeholder="输入债主邮箱确认"><div class="row" style="margin-top:10px"><button class="btn btn-sm btn-ghost" onclick="closeConf()">取消</button><button class="btn btn-sm btn-conf" onclick="doConfirm()">确认清账</button></div></div></div>
+<div class="modal" id="confModal"><div class="box"><h3>🔐 债主确认清账</h3><p style="font-size:13px;color:#6b8aa0;margin-bottom:10px">本笔账已全部还清。为视为正式清账，请由<b style="color:var(--ocean-3)" id="cfCreditor"></b>（债主）输入邮箱确认：</p><input type="text" id="cfInput" placeholder="输入债主邮箱确认"><div class="row" style="margin-top:10px"><button class="btn btn-sm btn-ghost" onclick="closeConf()">取消</button><button class="btn btn-sm btn-conf" onclick="doConfirm()">确认清账</button></div></div></di
 
 <div class="modal" id="reductionModal"><div class="box"><h3 id="redTitle">🎫 发放减债券</h3><p style="font-size:13px;color:#6b8aa0;margin-bottom:10px" id="redInfo"></p><div class="grid"><div><label>发放日期</label><input type="date" id="rDate"></div><div><label>减免数目（下）</label><input type="number" id="rCount" min="1" step="1" placeholder="减免几下"></div><div class="full"><label>减免原因</label><input type="text" id="rReason" placeholder="比如：表现好"></div></div><div class="row" style="margin-top:12px"><button class="btn btn-sm btn-ghost" onclick="closeReduction()">取消</button><button class="btn btn-sm btn-conf" onclick="confirmReduction()">确认发放</button></div></div></div>
+v>
 
 <div class="toast" id="toast"></div>
 
